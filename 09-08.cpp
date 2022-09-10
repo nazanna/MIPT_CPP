@@ -28,7 +28,7 @@ bool is_lower(int* a, int* b, void* env = nullptr) {
 
 struct Heap{
     int* start;
-
+    void* env;
     Heap() {
         // cout << "im default constructor\n";
         start = new int[1000];
