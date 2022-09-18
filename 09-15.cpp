@@ -11,7 +11,7 @@ using std::getline;
 
 
 struct Point{
-    unsigned long long const x, y;
+    unsigned long long x, y;
 
     Point(unsigned long long x, unsigned long long y):
         x(x), y(y) {}
@@ -32,6 +32,13 @@ struct Point{
         return Point(x, rha.y > y ? rha.y : y);
     }
 
+    Point operator=(Point const &rha){
+        x = rha.x;
+        y = rha.y;
+        return *this;
+
+    }
+
     void print() const {
         cout << '(' << x << ',' << y << ')' ;
     }
@@ -40,7 +47,7 @@ struct Point{
 struct Rectangle{
     Point point;
 
-    Rectangle (): point(0,0) {}
+    Rectangle (): point(Point(0,0)) {}
     Rectangle (Point const &point): point(point) {}
 
     Rectangle operator+(Rectangle const &rha) const {
@@ -52,7 +59,8 @@ struct Rectangle{
     }
 
     Rectangle operator=(Rectangle const &rha){
-        return Rectangle(rha.point);
+        point = rha.point;
+        return *this;
     }
 
     void print () const{
