@@ -41,11 +41,13 @@ void swap(void *a, void *b, size_t element_byte_size) {
 struct Heap{
     void* memory;
     void* env;
-    Heap(bool (*cmp)(void*, void*, void*), void* memory, void* env, size_t element_byte_size): 
-    cmp(cmp), memory(memory), env(env), element_byte_size(element_byte_size) {}
-    bool (*cmp)(void*, void*, void*);
     int n=0;
     size_t element_byte_size;
+    bool (*cmp)(void*, void*, void*);
+    
+    Heap(bool (*cmp)(void*, void*, void*), void* memory, void* env, size_t element_byte_size): 
+    cmp(cmp), memory(memory), env(env), element_byte_size(element_byte_size) {}
+    
 
     void sift_up(const int& u) {
         int v = u;
