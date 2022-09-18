@@ -32,7 +32,7 @@ struct Point{
         return Point(x, rha.y > y ? rha.y : y);
     }
 
-    Point operator=(Point const &rha){
+    Point& operator=(Point const &rha){
         x = rha.x;
         y = rha.y;
         return *this;
@@ -58,7 +58,7 @@ struct Rectangle{
         return Rectangle(Point(point.minx(rha.point).x, point.miny(rha.point).y));
     }
 
-    Rectangle operator=(Rectangle const &rha){
+    Rectangle& operator=(Rectangle const &rha){
         point = rha.point;
         return *this;
     }
@@ -69,15 +69,17 @@ struct Rectangle{
 };
 
 Rectangle* R(string str){
-    string x, y;
+    int x, y;
     int num_left, num_comma, num_right;
     num_left = str.find('(');
     num_comma = str.find(',');
     num_right = str.find(')');
-    x = (str.substr(num_left, num_comma));
-    y = (str.substr(num_comma, num_left));
-    cout << x<<"_"<<y;
+    x = stoi(str.substr(num_left+1, num_comma-1));
+    y = stoi(str.substr(num_comma+1, num_right-1));
+    Point point(x, y);
+    cout << x<<"_"<<y<<"_in R";
     Rectangle* rect;
+    *rect = Rectangle(point);
     return rect;
 
 }
@@ -93,7 +95,7 @@ Rectangle* M(string str){
         *rect = ((*R(str1)) * (*M(str2)));
     }
     else{
-        *rect = Rectangle((*R(str)).point);
+        *rect = (*R(str));
     }
     return rect;
 }
@@ -134,8 +136,9 @@ int main(){
     (rect3*rect2).print();
     cout<<endl;
     Rectangle* rect33;
-    string str="(3,5)+(6, 9)";
-    rect33 = S(str);
+    string str="(3,5)";
+    rect33 = R(str);
+    (*rect33).print();
 
     return 0;
 }
