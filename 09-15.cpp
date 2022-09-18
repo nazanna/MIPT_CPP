@@ -11,7 +11,7 @@ using std::string;
 
 struct Point
 {
-    unsigned long long x, y;
+    unsigned long long const x, y;
 
     Point(unsigned long long x, unsigned long long y) : x(x), y(y) {}
 
@@ -35,13 +35,6 @@ struct Point
         return Point(x, rha.y > y ? rha.y : y);
     }
 
-    Point &operator=(Point const &rha)
-    {
-        x = rha.x;
-        y = rha.y;
-        return *this;
-    }
-
     void print() const
     {
         cout << '(' << x << ',' << y << ')';
@@ -63,12 +56,6 @@ struct Rectangle
     Rectangle operator*(Rectangle const &rha) const
     {
         return Rectangle(Point(point.minx(rha.point).x, point.miny(rha.point).y));
-    }
-
-    Rectangle &operator=(Rectangle const &rha)
-    {
-        point = rha.point;
-        return *this;
     }
 
     void print() const
