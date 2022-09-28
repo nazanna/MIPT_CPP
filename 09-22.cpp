@@ -14,10 +14,7 @@ using State = int;
 class AllState
 {
 public:
-    virtual bool contains(State s) const 
-    {
-        return true;
-    }
+    virtual bool contains(State s) const = 0;
 };
 
 class DiscreteState : public AllState
@@ -54,25 +51,27 @@ private:
 public:
     ProbabilityTest(State E_min, State E_max) : E_min(E_min), E_max(E_max) {}
 
-    float test(AllState system, unsigned test_count, unsigned seed) const
+    float test(AllState *system, unsigned test_count, unsigned seed) const
     {
         std::default_random_engine reng(seed);
         std::uniform_int_distribution<int> dstr(E_min, E_max);
-
         unsigned good = 0;
+        State smth;
         for (unsigned cnt = 0; cnt != test_count; ++cnt)
-            if (system.contains(dstr(reng)))
+        {
+            if (system->contains(dstr(reng)))
                 ++good;
-
+        }
         return static_cast<float>(good) / static_cast<float>(test_count);
     }
 };
 
 int main()
 {
-    DiscreteState d(0);
-    SegmentState s(0, 100);
+    DiscreteState *d = new DiscreteState(0);
+    SegmentState *s = new SegmentState(0, 100);
     ProbabilityTest pt(-1000, 1000);
-    std::cout << pt.test(d, 20000, 1) << std::endl;
+    std::cout << pt.test(d, 20000, 2) << std::endl;
     std::cout << pt.test(s, 20000, 1) << std::endl;
+    delete d; delete s;
 }
