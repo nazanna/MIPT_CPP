@@ -16,7 +16,7 @@ public:
     virtual bool contains(State s) const = 0;
 };
 
-class DiscreteState : public AllState
+class DiscreteState final : public AllState
 {
 private:
     State const s0;
@@ -29,7 +29,7 @@ public:
     }
 };
 
-class SegmentState : public AllState
+class SegmentState final : public AllState
 {
 private:
     State const begin_s0, end_s0;
@@ -42,13 +42,13 @@ public:
     }
 };
 
-class AnyState : public AllState
+class AnyState final : public AllState
 {
 private:
     std::vector<State> points;
 
 public:
-    AnyState(std::vector<State> points) : points(points){}
+    AnyState(std::vector<State> points) : points(points) {}
 
     bool contains(State s) const override
     {
@@ -96,7 +96,7 @@ public:
     }
 };
 
-class ProbabilityTest
+class ProbabilityTest final
 {
 private:
     State const E_min, E_max;
