@@ -1,8 +1,7 @@
 #include <iostream>
-#include <algorithm>
-#include <cstdlib>
 #include <random>
-#include <string>
+#include <fstream>
+#include <vector>
 
 using std::cin;
 using std::cout;
@@ -43,6 +42,60 @@ public:
     }
 };
 
+class AnyState : public AllState
+{
+private:
+    std::vector<State> points;
+
+public:
+    AnyState(std::vector<State> points) : points(points){}
+
+    bool contains(State s) const override
+    {
+        bool contain = false;
+        for (int i = 0; i < points.size(); i++)
+        {
+            if (points[i] == s)
+                contain = true;
+        }
+        return contain;
+    }
+
+    AnyState merge(AnyState state1)
+    {
+        state1.points.insert(state1.points.end(), points.begin(), points.end());
+        return state1;
+    }
+
+    AnyState cross(AnyState state1)
+    {
+        std::vector<State> point;
+        AnyState state(point);
+        for (int i = 0; i < points.size(); i++)
+        {
+            if (state1.contains(points[i]))
+            {
+                state.points.push_back(points[i]);
+            }
+        }
+        return state;
+    }
+
+    AnyState inverse(AnyState state, State E_min, State E_max)
+    {
+        std::vector<State> point;
+        AnyState statef(point);
+        for (State i = E_min; i <= E_max; i++)
+        {
+            if (!contains(i))
+            {
+                statef.points.push_back(i);
+            }
+        }
+        return statef;
+    }
+};
+
 class ProbabilityTest
 {
 private:
@@ -66,12 +119,45 @@ public:
     }
 };
 
-int main()
+void count()
 {
+    std::fstream f1, f2;
+    f1.open("discrete.txt", std::ios::out);
+    f2.open("segment.txt", std::ios::out);
     DiscreteState *d = new DiscreteState(0);
     SegmentState *s = new SegmentState(0, 100);
-    ProbabilityTest pt(-1000, 1000);
-    std::cout << pt.test(d, 20000, 2) << std::endl;
-    std::cout << pt.test(s, 20000, 1) << std::endl;
-    delete d; delete s;
+    State E_min = -1000;
+    State E_max = 1000;
+    ProbabilityTest pt(E_min, E_max);
+    for (unsigned num = 1; num < 100000; num += 30)
+    {
+        f2 << pt.test(s, num, 1) << " , " << pt.test(s, num, 2) << " , " << pt.test(s, num, 3) << " , " << pt.test(s, num, 4) << " , " << num << std::endl;
+        f1 << pt.test(d, num, 1) << " , " << pt.test(d, num, 2) << " , " << pt.test(d, num, 3) << " , " << pt.test(d, num, 4) << " , " << num << std::endl;
+    }
+    f1.close();
+    f2.close();
+    delete d;
+    delete s;
+
+    std::fstream f;
+    f.open("all.csv", std::ios::out);
+    std::vector<State> point;
+    std::default_random_engine reng(1);
+    std::uniform_int_distribution<int> dstr(E_min, E_max);
+    for (int i = 0; i < 101; i++)
+    {
+        point.push_back(dstr(reng));
+    }
+    AnyState *a = new AnyState(point);
+    for (unsigned num = 1; num < 100000; num += 30)
+    {
+        f << pt.test(a, num, 1) << " , " << pt.test(a, num, 2) << " , " << pt.test(a, num, 3) << " , " << pt.test(a, num, 4) << " , " << num << std::endl;
+    }
+    f.close();
+    delete a;
+}
+
+int main()
+{
+    count();
 }
