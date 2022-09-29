@@ -163,7 +163,7 @@ public:
 
 void count()
 {
-    /*std::fstream f1, f2;
+    std::fstream f1, f2;
     f1.open("discrete.txt", std::ios::out);
     f2.open("segment.txt", std::ios::out);
     DiscreteState *d = new DiscreteState(0);
@@ -179,7 +179,7 @@ void count()
     f1.close();
     f2.close();
     delete d;
-    delete s;*/
+    delete s;
 
     /*std::fstream f;
     f.open("all.csv", std::ios::out);
