@@ -14,18 +14,18 @@ struct Comparator
 template <typename T>
 struct Heap
 {
-    Comparator<T> *cmp;
+    Comparator<T> const &cmp;
     T *memory;
     int n = 0;
 
-    Heap(T *memory, Comparator<T> *cmp) : memory(memory), cmp(cmp) {}
+    Heap(T *memory, Comparator<T> const &cmp) : memory(memory), cmp(cmp) {}
 
     void sift_up(const int &u)
     {
         int v = u;
         while (v != 0)
         {
-            if ((*cmp)(memory[v], memory[(v - 1) / 2]))
+            if ((cmp)(memory[v], memory[(v - 1) / 2]))
             {
                 T prom = memory[v];
                 memory[v] = memory[(v - 1) / 2];
@@ -49,11 +49,11 @@ struct Heap
         while (2 * v + 1 <= n - 1)
         {
             int u = 2 * v + 1;
-            if (u + 1 <= n - 1 && (*cmp)(memory[u + 1], memory[u]))
+            if (u + 1 <= n - 1 && (cmp)(memory[u + 1], memory[u]))
             {
                 u++;
             }
-            if ((*cmp)(memory[u], memory[v]))
+            if ((cmp)(memory[u], memory[v]))
             {
                 T prom = memory[v];
                 memory[v] = memory[u];
@@ -91,8 +91,6 @@ struct Heap
 
     void free()
     {
-        delete[] memory;
-        delete cmp;
     }
 };
 
@@ -116,7 +114,7 @@ bool test()
 {
     bool t1 = true;
     int *mem = new int[100];
-    IntComparator *cmp = new IntComparator;
+    IntComparator cmp;
     Heap heap(mem, cmp);
     heap.insert(3);
     if (heap.get_min() != 3)
@@ -134,7 +132,7 @@ bool test()
 
     bool t2 = true;
     char *mems = new char[100];
-    CharComparator *cmps = new CharComparator;
+    CharComparator cmps;
     Heap heaps(mems, cmps);
     heaps.insert('j');
     if (heaps.get_min() != 'j')
