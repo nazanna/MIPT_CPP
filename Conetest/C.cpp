@@ -20,10 +20,11 @@ private:
         return (((lhs.numerator == rhs.numerator) && (rhs.denominator == lhs.denominator)) || ((rhs.numerator == lhs.numerator) && (rhs.numerator == 0)));
     }
 
-    friend bool operator==(const Fraction &lhs, const int64_t &rhs)
+    friend bool operator==(const Fraction &lhs, const double &rhs)
     {
-        return (((lhs.numerator == rhs) && (1 == lhs.denominator)) || ((lhs.numerator == 0) && (rhs == 0)));
+        return abs((lhs.numerator / lhs.denominator)  - rhs)<=0.0001;
     }
+
 
 public:
     Fraction(int64_t numerator_out, uint64_t denominator_out) : numerator(numerator_out / gcd(abs(numerator_out), denominator_out)),
@@ -96,7 +97,7 @@ int main()
     Fraction a(1, 3);
     a += Fraction(2, 3);
     std::cout << (a == 1);
-    std::cout << ((Fraction(-4, 14) * Fraction(12, 7)) == Fraction(-24, 49)) << " ";
+    std::cout << ((Fraction(-4, 14) * Fraction(12, 7)) == (double)(-24/49)) << " ";
 
     return 0;
 }
