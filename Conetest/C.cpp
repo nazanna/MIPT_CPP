@@ -96,7 +96,7 @@ int main()
     Fraction a(1, 3);
     a += Fraction(2, 3);
     std::cout << (a == 1);
-    std::cout << ((Fraction(2, 7) * Fraction(12, 7)) == Fraction(24, 49)) << " ";
+    std::cout << ((Fraction(-4, 14) * Fraction(12, 7)) == Fraction(-24, 49)) << " ";
 
     return 0;
 }
