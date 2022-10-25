@@ -17,7 +17,8 @@ private:
 
     friend bool operator==(const Fraction &lhs, const Fraction &rhs)
     {
-        return ((lhs.numerator == rhs.numerator) && (rhs.denominator == lhs.denominator));
+        return (((lhs.numerator == rhs.numerator) && (rhs.denominator == lhs.denominator)) 
+        ||((rhs.denominator == lhs.denominator) && (rhs.denominator==0)));
     }
 
     friend bool operator==(const Fraction &lhs, const int64_t &rhs)
@@ -105,7 +106,7 @@ int main()
     Fraction a(1,3);
     a += Fraction(2, 3);
     std::cout << (a == 1);
-    std::cout << ((Fraction(2, 7) + Fraction(12, 7)) == (int64_t)2) << " ";
+    std::cout << ((Fraction(0, 7) + Fraction(2, 1)) == (int64_t)2) << " ";
 
     return 0;
 }
