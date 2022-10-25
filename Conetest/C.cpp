@@ -12,15 +12,14 @@ private:
     template <typename T>
     friend bool operator==(const Fraction &lhs, const T &rhs)
     {
-        return abs((T)(lhs.numerator / lhs.denominator) - (T)rhs )<= (T)(0.001);
+        return (T)(lhs.numerator / lhs.denominator) == rhs;
+        ;
     }
 
     friend bool operator==(const Fraction &lhs, const Fraction &rhs)
     {
         return (((lhs.numerator == rhs.numerator) && (rhs.denominator == lhs.denominator)) || ((rhs.numerator == lhs.numerator) && (rhs.numerator == 0)));
     }
-
-
 
 public:
     Fraction(int64_t numerator_out, uint64_t denominator_out) : numerator(numerator_out / gcd(abs(numerator_out), denominator_out)),
@@ -49,7 +48,7 @@ public:
         return frac;
     }
 
-    Fraction &operator+=(const Fraction &rha) 
+    Fraction &operator+=(const Fraction &rha)
     {
         *this = (*this) + rha;
         return *this;
@@ -57,7 +56,7 @@ public:
 
     Fraction operator-(const Fraction &rha) const
     {
-        int64_t numer = rha.numerator * denominator - numerator * rha.denominator;
+        int64_t numer = -rha.numerator * denominator + numerator * rha.denominator;
         uint64_t denom = rha.denominator * denominator;
         int64_t gcd_n_d = gcd(abs(numer), denom);
         denom /= gcd_n_d;
@@ -68,16 +67,16 @@ public:
 
     Fraction operator*(const Fraction &rha) const
     {
-        int64_t numer = rha.numerator * numerator;
-        uint64_t denom = rha.denominator * denominator;
-        int64_t gcd_n_d = gcd(abs(numer), denom);
-        denom /= gcd_n_d;
-        numer = numer / gcd_n_d;
+        int64_t gcd_n_d_1 = gcd(abs(rha.numerator), denominator);
+        int64_t gcd_n_d_2 = gcd(abs(numerator), rha.denominator);
+        int64_t numer = rha.numerator / gcd_n_d_1 / gcd_n_d_2* numerator ;
+        uint64_t denom = rha.denominator/ gcd_n_d_1 / gcd_n_d_2 * denominator ;
+        std::cout<<rha.numerator<<  " "<<denominator<<" "<<gcd_n_d_1<<std::endl;
         Fraction frac(numer, denom);
         return frac;
     }
 
-    Fraction operator-()const
+    Fraction operator-() const
     {
         int64_t numer = -1 * numerator;
         Fraction frac(numer, denominator);
@@ -90,11 +89,10 @@ public:
 
 int main()
 {
-    Fraction a(1, 3);
-    a += Fraction(2, 3);
-    std::cout << (a == 1);
-    std::cout << ((Fraction(-4, 14) * Fraction(12, 7)) == (double)(-24/49)) << " ";
 
-    std::cout << ((Fraction(-4, 14) == Fraction(-2, 7)) )<< " ";
+    Fraction a(1000000000547ull, 1000000000039ull);
+    Fraction b(1000000000039ull, 1000000000211ull);
+    Fraction c = a * b;
+    std::cout << (c == Fraction(1000000000547ull, 1000000000211ull)) << " ";
     return 0;
 }
