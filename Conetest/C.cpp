@@ -12,7 +12,7 @@ private:
     template <class T>
     friend bool operator==(const Fraction &lhs, const T &rhs)
     {
-        return (T)(lhs.numerator / lhs.denominator) == (T)rhs;
+        return abs((T)(lhs.numerator / lhs.denominator) - (T)rhs )<= (T)(0.001);
     }
 
     friend bool operator==(const Fraction &lhs, const Fraction &rhs)
@@ -20,10 +20,6 @@ private:
         return (((lhs.numerator == rhs.numerator) && (rhs.denominator == lhs.denominator)) || ((rhs.numerator == lhs.numerator) && (rhs.numerator == 0)));
     }
 
-    friend bool operator==(const Fraction &lhs, const double &rhs)
-    {
-        return abs((lhs.numerator / lhs.denominator)  - rhs)<=0.0001;
-    }
 
 
 public:
