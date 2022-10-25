@@ -9,7 +9,7 @@ private:
     uint64_t denominator;
 
     // Do NOT delete
-    template <class T>
+    template <typename T>
     friend bool operator==(const Fraction &lhs, const T &rhs)
     {
         return abs((T)(lhs.numerator / lhs.denominator) - (T)rhs )<= (T)(0.001);
@@ -95,5 +95,6 @@ int main()
     std::cout << (a == 1);
     std::cout << ((Fraction(-4, 14) * Fraction(12, 7)) == (double)(-24/49)) << " ";
 
+    std::cout << ((Fraction(-4, 14) == Fraction(-2, 7)) )<< " ";
     return 0;
 }
