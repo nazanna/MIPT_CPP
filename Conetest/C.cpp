@@ -12,7 +12,7 @@ private:
     template <class T>
     friend bool operator==(const Fraction &lhs, const T &rhs)
     {
-        return (double)(lhs.numerator / lhs.denominator) == (double)rhs;
+        return (T)(lhs.numerator / lhs.denominator) == (T)rhs;
     }
 
     friend bool operator==(const Fraction &lhs, const Fraction &rhs)
@@ -39,7 +39,7 @@ public:
         return *this;
     }
 
-    int64_t gcd(int64_t a, uint64_t b) const { return (a == 0 ? b : gcd(b % a, a)); }
+    int64_t gcd(int64_t a, int64_t b) const { return (a == 0 ? b : gcd(b % a, a)); }
 
     Fraction operator+(const Fraction &rha) const
     {
@@ -96,7 +96,7 @@ int main()
     Fraction a(1, 3);
     a += Fraction(2, 3);
     std::cout << (a == 1);
-    std::cout << ((Fraction(2, 7) + Fraction(12, 7)) == (int64_t)2) << " ";
+    std::cout << ((Fraction(2, 7) * Fraction(12, 7)) == Fraction(24, 49)) << " ";
 
     return 0;
 }
