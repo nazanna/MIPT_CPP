@@ -28,7 +28,8 @@ private:
 
 
 public:
-    Fraction(int64_t numerator, uint64_t denominator) : numerator(numerator), denominator(denominator) {}
+    Fraction(int64_t numerator_out, uint64_t denominator_out) : numerator(numerator_out/gcd(numerator_out, denominator_out)),
+                                                             denominator(denominator_out/gcd(numerator_out, denominator_out)) {}
     Fraction() = delete;
     Fraction(const Fraction &rhs) : Fraction(rhs.numerator, rhs.denominator) {}
 
@@ -62,7 +63,7 @@ public:
         return frac;
     }
 
-    Fraction operator+=(Fraction rha)
+    Fraction& operator+=(Fraction rha)
     {
         *this = (*this)+rha;
         return *this;
