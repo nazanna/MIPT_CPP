@@ -43,16 +43,16 @@ public:
 
     int64_t gcd(int64_t a, uint64_t b) { return (a == 0 ? b : gcd(b % a, a)); }
 
-    int64_t num()
+    int64_t num() const
     {
         return numerator;
     }
-    uint64_t den()
+    uint64_t den() const
     {
         return denominator;
     }
 
-    Fraction operator+(Fraction rha)
+    Fraction operator+(const Fraction &rha)
     {
         int64_t numer = rha.num() * denominator + numerator * rha.den();
         uint64_t denom = rha.den() * denominator;
@@ -63,13 +63,13 @@ public:
         return frac;
     }
 
-    Fraction& operator+=(Fraction rha)
+    Fraction& operator+=(const Fraction &rha)
     {
         *this = (*this)+rha;
         return *this;
     }
 
-    Fraction operator-(Fraction rha)
+    Fraction operator-(const Fraction &rha)
     {
         int64_t numer = rha.num() * denominator - numerator * rha.den();
         uint64_t denom = rha.den() * denominator;
@@ -80,7 +80,7 @@ public:
         return frac;
     }
 
-    Fraction operator*(Fraction rha)
+    Fraction operator*(const Fraction &rha)
     {
         int64_t numer = rha.num() * numerator;
         uint64_t denom = rha.den() * denominator;
@@ -107,7 +107,7 @@ int main()
     Fraction a(1,3);
     a += Fraction(2, 3);
     std::cout << (a == 1);
-    std::cout << ((Fraction(0, 7) == (int64_t)0)) << " ";
+    std::cout << ((Fraction(2, 7) + Fraction(12, 7)) == (int64_t)2)  << " ";
 
     return 0;
 }
