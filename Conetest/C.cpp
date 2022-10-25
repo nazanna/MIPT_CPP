@@ -15,6 +15,17 @@ private:
         return (double)(lhs.numerator / lhs.denominator) == (double)rhs;
     }
 
+    friend bool operator==(const Fraction &lhs, const Fraction &rhs)
+    {
+        return ((lhs.numerator == rhs.numerator) && (rhs.denominator == lhs.denominator));
+    }
+
+    friend bool operator==(const Fraction &lhs, const int64_t &rhs)
+    {
+        return ((lhs.numerator == rhs) && (1 == lhs.denominator));
+    }
+
+
 public:
     Fraction(int64_t numerator, uint64_t denominator) : numerator(numerator), denominator(denominator) {}
     Fraction() = delete;
