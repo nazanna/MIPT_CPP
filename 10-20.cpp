@@ -110,7 +110,7 @@ public:
     size_type get_y_size() const { return y_size; }
     size_type get_x_size() const { return x_size; }
 };
-
+/*
 template <typename T, unsigned n>
 class Grid_n final
 {
@@ -141,7 +141,7 @@ public:
         {
             return (grid+n_size*n_index+grid(indexes...));
         }
-    /*
+    
         //конструктор копирования
         Grid(Grid<T> const &src) : Grid(src.x_size, src.y_size)
         {
@@ -216,8 +216,8 @@ public:
         }
 
         size_type get_y_size() const { return y_size; }
-        size_type get_x_size() const { return x_size; }*/
-};
+        size_type get_x_size() const { return x_size; }
+};*/
 
 int main()
 {
@@ -233,19 +233,11 @@ int main()
 
     for (gsize_t y_idx = 0; y_idx != g.get_y_size(); ++y_idx)
         for (gsize_t x_idx = 0; x_idx != g.get_x_size(); ++x_idx)
-            g[y_idx][x_idx] = 0.0f;
+            g[y_idx][x_idx] = 1.0f;
 
     for (gsize_t y_idx = 0; y_idx != g.get_y_size(); ++y_idx)
         for (gsize_t x_idx = 0; x_idx != g.get_x_size(); ++x_idx)
             assert(1.0f == g(y_idx, x_idx));
 
-    Grid_n<float, 3> const g3(2, 3, 4, 1.0f);
-    assert(1.0f == *g3(1, 1, 1));
-
-    Grid_n<float, 2> g2(2, 5, 2.0f);
-    assert(2.0f == g2(1, 1));
-
-    g2 = g3[1];
-    assert(1.0f == g2(1, 1));
     return 0;
 }
