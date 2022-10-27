@@ -58,7 +58,7 @@ public:
     //перемещающее присваивание
     Grid<T> &operator=(Grid<T> &&src)
     {
-        Grid<T> cmp(std::move(src));
+        Grid<T> cmp(src);
         std::swap(this->data, cmp.data);
         std::swap(this->x_size, cmp.x_size);
         std::swap(this->y_size, cmp.y_size);
