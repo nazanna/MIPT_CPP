@@ -39,9 +39,13 @@ public:
 
     Fraction operator+(const Fraction &rha) const
     {
-        int64_t numer = rha.numerator * denominator + numerator * rha.denominator;
-        uint64_t denom = rha.denominator * denominator;
-        int64_t gcd_n_d = gcd(abs(numer), denom);
+        int64_t gcd_n_d = gcd(rha.denominator, denominator);
+
+        int64_t denom_1 = rha.denominator / gcd_n_d;
+        int64_t denom_2 = denominator / gcd_n_d;
+        int64_t numer = rha.numerator * denom_2 + numerator * denom_1;
+        uint64_t denom = denom_1 * denom_2 * gcd_n_d;
+        gcd_n_d = gcd(abs(numer), denom);
         denom /= gcd_n_d;
         numer = numer / gcd_n_d;
         Fraction frac(numer, denom);
@@ -65,13 +69,14 @@ public:
         return frac;
     }
 
-    Fraction operator*(const Fraction &rha) const
+     Fraction operator*(const Fraction &rha) const
     {
-        int64_t gcd_n_d_1 = gcd(abs(rha.numerator), denominator);
-        int64_t gcd_n_d_2 = gcd(abs(numerator), rha.denominator);
-        int64_t numer = rha.numerator / gcd_n_d_1 / gcd_n_d_2* numerator ;
-        uint64_t denom = rha.denominator/ gcd_n_d_1 / gcd_n_d_2 * denominator ;
-        std::cout<<rha.numerator<<  " "<<denominator<<" "<<gcd_n_d_1<<std::endl;
+        int64_t gcd_n_d_1 = gcd(std::abs(rha.numerator), denominator);
+        int64_t gcd_n_d_2 = gcd(std::abs(numerator), rha.denominator);
+        int64_t numer = rha.numerator / gcd_n_d_1;
+        numer *= (numerator / gcd_n_d_2);
+        uint64_t denom = rha.denominator / gcd_n_d_2;
+        denom *= (denominator/ gcd_n_d_1);
         Fraction frac(numer, denom);
         return frac;
     }
@@ -89,10 +94,8 @@ public:
 
 int main()
 {
-
-    Fraction a(1000000000547ull, 1000000000039ull);
-    Fraction b(1000000000039ull, 1000000000211ull);
-    Fraction c = a * b;
-    std::cout << (c == Fraction(1000000000547ull, 1000000000211ull)) << " ";
+    Fraction c(-4, 12);
+    Fraction b(2, 6);
+    std::cout << (-c + b == Fraction(2,3)) << " ";    
     return 0;
 }
