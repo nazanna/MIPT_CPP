@@ -69,14 +69,14 @@ public:
         return frac;
     }
 
-     Fraction operator*(const Fraction &rha) const
+    Fraction operator*(const Fraction &rha) const
     {
         int64_t gcd_n_d_1 = gcd(std::abs(rha.numerator), denominator);
         int64_t gcd_n_d_2 = gcd(std::abs(numerator), rha.denominator);
         int64_t numer = rha.numerator / gcd_n_d_1;
         numer *= (numerator / gcd_n_d_2);
         uint64_t denom = rha.denominator / gcd_n_d_2;
-        denom *= (denominator/ gcd_n_d_1);
+        denom *= (denominator / gcd_n_d_1);
         Fraction frac(numer, denom);
         return frac;
     }
@@ -96,6 +96,6 @@ int main()
 {
     Fraction c(-4, 12);
     Fraction b(2, 6);
-    std::cout << (-c + b == Fraction(2,3)) << " ";    
+    std::cout << (-c + b == Fraction(2, 3)) << " ";
     return 0;
 }
