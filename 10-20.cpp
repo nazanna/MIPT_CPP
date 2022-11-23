@@ -18,16 +18,17 @@ private:
     T *data;
 
 public:
-    Grid(size_type y_size, size_type x_size) : y_size(y_size), x_size(x_size), data(new T[x_size * y_size]) {}
-    Grid(T const &t) : Grid(1, 1)
+    Grid(size_type y_size, size_type x_size) : Grid(y_size, x_size, T());
+    //y_size(y_size), x_size(x_size), ata(new T[x_size * y_size]) {}
+    Grid(T const &t) : Grid(1, 1, t)
     {
-        data[0] = t;
     }
-    Grid(size_type y_size, size_type x_size, T const &t) : Grid(y_size, x_size)
+    Grid(size_type y_size, size_type x_size, T const &t) //: Grid(y_size, x_size)
     {
+        data = (T*)operator new(y_size*x_size*sizeof(T));
         for (unsigned i = 0; i < x_size * y_size; ++i)
         {
-            data[i] = t;
+            new(data+i) T(t);
         }
     }
 
@@ -58,7 +59,7 @@ public:
     //перемещающее присваивание
     Grid<T> &operator=(Grid<T> &&src)
     {
-        Grid<T> cmp(src);
+        Grid<T> cmp(std::move(src));
         std::swap(this->data, cmp.data);
         std::swap(this->x_size, cmp.x_size);
         std::swap(this->y_size, cmp.y_size);
@@ -67,7 +68,11 @@ public:
     //деструктор
     ~Grid<T>()
     {
-        delete[] data;
+        for (int i=0; i<x_size*y_size; i++){
+            (*(data+i)).~T();
+        }
+        operator delete data;
+        //delete[] data;
     }
 
     T operator()(size_type y_idx, size_type x_idx) const
