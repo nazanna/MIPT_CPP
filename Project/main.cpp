@@ -106,62 +106,54 @@ public:
 
 
 struct Ball {
-    sf::Color color;
-    float radius, x, y;
     sf::CircleShape shape;
 
-    Ball(sf::Color color, float x, float y, float radius) : color(color), radius(radius), x(x), y(y), shape(radius) {
+    Ball(sf::Color color, int x, int y, int radius) :shape(radius) {
         shape.setFillColor(color);
         shape.setPosition(x, y);
     }
 
-    Ball(Ball const &src) : Ball(src.color, src.x, src.y, src.radius) {
-        shape.setFillColor(color);
-        shape.setPosition(x, y);
+    Ball(Ball const &src) : Ball(src.shape.getFillColor(), src.shape.getPosition().x, src.shape.getPosition().y, src.shape.getRadius()) {
     }
 
     //оператор копирующего присваивания
     Ball &operator=(Ball const &src) {
         Ball cmp(src);
-        std::swap(this->color, cmp.color);
-        std::swap(this->x, cmp.x);
-        std::swap(this->y, cmp.y);
-        std::swap(this->radius, cmp.radius);
         std::swap(this->shape, cmp.shape);
-
     }
 
     //конструктор перемещения
-    Ball(Ball &&src) : color(src.color), radius(src.radius), x(src.x), y(src.y), shape(radius) {
-        shape.setFillColor(color);
-        shape.setPosition(x, y);
+    Ball(Ball &&src) :shape(src.shape.getRadius()) {
+        shape.setFillColor(src.shape.getFillColor());
+        shape.setPosition(src.shape.getPosition().x, src.shape.getPosition().y);
     }
 
     //перемещающее присваивание
     Ball &operator=(Ball &&src) {
+        cout << "перемещение"<<endl;
         Ball cmp(std::move(src));
-        std::swap(this->color, cmp.color);
-        std::swap(this->x, cmp.x);
-        std::swap(this->y, cmp.y);
-        std::swap(this->radius, cmp.radius);
         std::swap(this->shape, cmp.shape);
     }
 
     ~Ball() {}
 
     void draw(sf::RenderWindow *window) {
-        shape.setPosition(x, y);
         window->draw(shape);
     }
 };
 
-struct Point{
-    int x, y;
-    Point(int x, int y): x(x), y(y){}
+struct Point {
 
-    Point &operator=(sf::Vector2<int> vec){
-        x=vec.x;
-        y=vec.y;
+    int x, y;
+
+    Point(int x, int y) : x(x), y(y) {}
+
+    Point(sf::Vector2i vector2) : Point(vector2.x, vector2.y) {}
+
+    Point &operator=(sf::Vector2<int> vec) {
+        x = vec.x;
+        y = vec.y;
+        return *this;
     }
 };
 
@@ -173,12 +165,10 @@ struct Field : public Grid<Ball> {
 
     Field(int size, vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
                                                 size(x_size), size_cell(50),
-                                                window(sf::VideoMode(200, 200), "") {
+                                                window(sf::VideoMode(600, 400), "") {
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
-
         }
-//        sf::RenderWindow window(sf::VideoMode(200, 200), "");
     }
 
     Field() : Field(0, std::vector<sf::Color>()) {}
@@ -189,30 +179,31 @@ struct Field : public Grid<Ball> {
         }
     }
 
-    int count(int x, int y) {
+    int count(Point point) {
+        int x = point.x;
+        int y = point.y;
         int number = -1;
         for (unsigned i = 0; i < size * size; ++i) {
-            int r = data[i].radius;
-            if (pow((data[i].x + r - x), 2) + pow((data[i].y + r - y), 2) <= pow(r, 2)) {
+            int r = data[i].shape.getRadius();
+            if (pow((data[i].shape.getPosition().x + r - x), 2) + pow((data[i].shape.getPosition().y + r - y), 2) <= pow(r, 2)) {
                 number = i;
             }
         }
         return number;
     }
 
-    void move(int number) {
+    void move(int number, Point start_data, Point start_mouse) {
         if (number >= 0) {
-            data[number].x = sf::Mouse::getPosition(window).x - data[number].radius;
-            data[number].y = sf::Mouse::getPosition(window).y - data[number].radius;
+            data[number].shape.setPosition(sf::Mouse::getPosition(window).x + start_data.x - start_mouse.x,
+                                           sf::Mouse::getPosition(window).y + start_data.y - start_mouse.y);
         }
-
 
     }
 
 
     void run() {
-        int moving_number=-1;
-        Point start_data(0,0), start_mouse(0,0);
+        int moving_number = -1;
+        Point start_data(0, 0), start_mouse(0, 0);
         while (window.isOpen()) {
             sf::Event event;
             while (window.pollEvent(event)) {
@@ -220,18 +211,28 @@ struct Field : public Grid<Ball> {
                     window.close();
 
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-                    if (event.type == sf::Event::MouseButtonPressed)
-                        moving_number = count(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
-                    start_data = sf::Mouse::getPosition();
-                    move(moving_number);
-                }
-                else{
-                    moving_number=-1;
+                    if (event.type == sf::Event::MouseButtonPressed) {
+                        start_mouse = sf::Mouse::getPosition(window);
+                        moving_number = count(start_mouse);
+                        if (moving_number>=0)
+                            start_data = Point(data[moving_number].shape.getPosition().x, data[moving_number].shape.getPosition().y);
+                    }
+                    move(moving_number, start_data, start_mouse);
                 }
 
                 if (event.type == sf::Event::MouseButtonReleased) {
-                    int number = count(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y);
-                    cout << "released" << number << endl;
+                    int number = count(sf::Mouse::getPosition(window));
+                    if (moving_number>=0){
+                        data[moving_number].shape.setPosition(start_data.x, start_data.y);
+                        if (number>=0 && number!=moving_number){
+                            std::swap(data[number], data[moving_number]);
+                            auto pos = data[number].shape.getPosition();
+                            data[number].shape.setPosition(data[moving_number].shape.getPosition());
+                            data[moving_number].shape.setPosition(pos);
+                        }
+                        else{}
+                        moving_number = -1;
+                    }
                 }
             }
             window.clear();
@@ -248,12 +249,20 @@ struct Field : public Grid<Ball> {
 int main() {
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
+    std::vector<sf::Color> color;
+    color.push_back(sf::Color::Magenta);
+    color.push_back(sf::Color::Blue);
+    color.push_back(sf::Color::Green);
+    color.push_back(sf::Color::Red);
+
     std::vector<sf::Color> colors;
-    colors.push_back(sf::Color::Magenta);
-    colors.push_back(sf::Color::Blue);
-    colors.push_back(sf::Color::Green);
-    colors.push_back(sf::Color::Red);
-    Field field(2, colors);
+    int n=4;
+    for (int i=0;i<n*n;i++){
+        int k=std::rand()%color.size();
+        colors.push_back(color[k]);
+    }
+
+    Field field(4, colors);
     field.run();
 
 
