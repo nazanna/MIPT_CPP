@@ -234,6 +234,7 @@ struct Field : public Grid<Ball> {
                         moving_number = -1;
                     }
                 }
+
             }
             window.clear();
             draw();
