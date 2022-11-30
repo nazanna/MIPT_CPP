@@ -167,7 +167,7 @@ struct Field : public Grid<Ball> {
                                                 size(x_size), size_cell(50),
                                                 window(sf::VideoMode(600, 400), "") {
         for (unsigned i = 0; i < size * size; ++i) {
-            data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
+            data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), i+3);
         }
     }
 
@@ -179,13 +179,48 @@ struct Field : public Grid<Ball> {
         }
     }
 
-    int count(Point point) {
+    vector<int> check(){
+        vector<int> poses;
+        for (int i=0;i<size;i++){
+            for (int j=0;j<size-2;j++) {
+                auto color1 = data[i * size + j].shape.getFillColor();
+                auto color2 = data[i * size + j + 1].shape.getFillColor();
+                auto color3 = data[i * size + j + 2].shape.getFillColor();
+                if (color1 == color2 && color1 == color3) {
+                    poses.push_back(i*size+j);
+                    poses.push_back(i*size+j+1);
+                    poses.push_back(i*size+j+2);
+                    cout << i * size + j << " " << i * size + j + 1 << " " << i * size + j + 2 << endl;
+                }
+            }
+        }
+        for (int j=0;j<size;j++){
+            for (int i=0;i<size-2;i++) {
+                auto color1 = data[i * size + j].shape.getFillColor();
+                auto color2 = data[(i+1) * size + j].shape.getFillColor();
+                auto color3 = data[(i+2) * size + j].shape.getFillColor();
+                if (color1 == color2 && color1 == color3) {
+                    poses.push_back(i*size+j);
+                    poses.push_back((i+1)*size+j);
+                    poses.push_back((i+2)*size+j);
+                    cout << i * size + j << " " << (i+1) * size + j  << " " << (i+2) * size +j << endl;
+                }
+            }
+        }
+
+        return poses;
+    }
+
+    int count(Point point, int ban_number=-1) {
         int x = point.x;
         int y = point.y;
         int number = -1;
-        for (unsigned i = 0; i < size * size; ++i) {
+        for (unsigned i = 0; i < size * size && i!=ban_number; ++i) {
             int r = data[i].shape.getRadius();
-            if (pow((data[i].shape.getPosition().x + r - x), 2) + pow((data[i].shape.getPosition().y + r - y), 2) <= pow(r, 2)) {
+//            cout << x <<" "<< y <<" "<< data[i].shape.getPosition().x<<" "
+//            <<data[i].shape.getPosition().y<<" "<<data[i].shape.getRadius()<<" "<<i<<endl;
+            if (pow((data[i].shape.getPosition().x + r - x), 2) + pow((data[i].shape.getPosition().y + r - y), 2)
+            <= pow(r, 2)) {
                 number = i;
             }
         }
@@ -197,7 +232,6 @@ struct Field : public Grid<Ball> {
             data[number].shape.setPosition(sf::Mouse::getPosition(window).x + start_data.x - start_mouse.x,
                                            sf::Mouse::getPosition(window).y + start_data.y - start_mouse.y);
         }
-
     }
 
 
@@ -221,16 +255,21 @@ struct Field : public Grid<Ball> {
                 }
 
                 if (event.type == sf::Event::MouseButtonReleased) {
-                    int number = count(sf::Mouse::getPosition(window));
+                    int number = count(sf::Mouse::getPosition(window), moving_number);
                     if (moving_number>=0){
                         data[moving_number].shape.setPosition(start_data.x, start_data.y);
                         if (number>=0 && number!=moving_number){
-                            std::swap(data[number], data[moving_number]);
-                            auto pos = data[number].shape.getPosition();
-                            data[number].shape.setPosition(data[moving_number].shape.getPosition());
-                            data[moving_number].shape.setPosition(pos);
+                            cout<<number<<endl;
+
+                            auto color = data[number].shape.getFillColor();
+                            data[number].shape.setFillColor(data[moving_number].shape.getFillColor());
+                            data[moving_number].shape.setFillColor(color);
+
+                            auto radius = data[number].shape.getRadius();
+                            data[number].shape.setRadius(data[moving_number].shape.getRadius());
+                            data[moving_number].shape.setRadius(radius);
+
                         }
-                        else{}
                         moving_number = -1;
                     }
                 }
@@ -238,6 +277,7 @@ struct Field : public Grid<Ball> {
             }
             window.clear();
             draw();
+            vector<int> f = check();
             window.display();
         }
 
