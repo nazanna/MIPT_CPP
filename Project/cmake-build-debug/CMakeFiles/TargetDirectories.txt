@@ -1,3 +1,0 @@
-/home/anna/MIPT_CPP/Project/cmake-build-debug/CMakeFiles/Project.dir
-/home/anna/MIPT_CPP/Project/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/anna/MIPT_CPP/Project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
