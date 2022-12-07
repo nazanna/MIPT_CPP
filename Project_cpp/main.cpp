@@ -171,6 +171,7 @@ struct Field : public Grid<Ball> {
 
     sf::RenderWindow window;
     sf::Text text;
+    sf::Font font;
     int size_cell;
 
     Field(int size, vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
@@ -179,8 +180,10 @@ struct Field : public Grid<Ball> {
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
         }
-        text.setPosition(0, 0);
-        text.setString("Score: \n" + std::to_string(score));
+        font.loadFromFile("../arial.ttf");
+        text.setFont(font);
+        text.setPosition(window.getSize().x * 0.8, 0);
+        text.setString(sf::String("Score: \n" + std::to_string(score)));
         text.setFillColor(sf::Color::Red);
         text.setOutlineColor(sf::Color::Red);
     }
@@ -197,32 +200,62 @@ struct Field : public Grid<Ball> {
     vector<int> check() {
         vector<int> poses;
         for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size - 2; j++) {
-                auto color1 = data[i * size + j].shape.getFillColor();
-                auto color2 = data[i * size + j + 1].shape.getFillColor();
-                auto color3 = data[i * size + j + 2].shape.getFillColor();
-                if (color1 == color2 && color1 == color3) {
-                    poses.push_back(i * size + j);
-                    poses.push_back(i * size + j + 1);
-                    poses.push_back(i * size + j + 2);
-//                    cout << i * size + j << " " << i * size + j + 1 << " " << i * size + j + 2 <<" check" <<endl;
+            int start = 0, max = 1, current = 1;
+            if (poses.size() == 0) {
+                for (int j = 1; j < size; j++) {
+                    auto color1 = data[i * size + j - 1].shape.getFillColor();
+                    auto color2 = data[i * size + j].shape.getFillColor();
+                    if (color1 == color2) {
+                        current++;
+                    } else {
+                        if (current > max) {
+                            max = current;
+                            start = j - current;
+                        }
+                        current = 1;
+                    }
                 }
-            }
-        }
-        for (int j = 0; j < size; j++) {
-            for (int i = 0; i < size - 2; i++) {
-                auto color1 = data[i * size + j].shape.getFillColor();
-                auto color2 = data[(i + 1) * size + j].shape.getFillColor();
-                auto color3 = data[(i + 2) * size + j].shape.getFillColor();
-                if (color1 == color2 && color1 == color3) {
-                    poses.push_back(i * size + j);
-                    poses.push_back((i + 1) * size + j);
-                    poses.push_back((i + 2) * size + j);
-//                    cout << i * size + j << " " << (i+1) * size + j  << " " << (i+2) * size +j << endl;
+                if (current > max) {
+                    max = current;
+                    start = size - current;
+                }
+                if (max >= 3) {
+                    for (int j = 0; j < max; j++) {
+                        poses.push_back(i * size + start + j);
+                    }
                 }
             }
         }
 
+        if (poses.size() == 0) {
+            for (int j = 0; j < size; j++) {
+                int start = 0, max = 1, current = 1;
+                if (poses.size() == 0) {
+                    for (int i = 1; i < size; i++) {
+                        auto color1 = data[(i - 1) * size + j].shape.getFillColor();
+                        auto color2 = data[i * size + j].shape.getFillColor();
+                        if (color1 == color2) {
+                            current++;
+                        } else {
+                            if (current > max) {
+                                max = current;
+                                start = i - current;
+                            }
+                            current = 1;
+                        }
+                    }
+                    if (current > max) {
+                        max = current;
+                        start = size - current;
+                    }
+                    if (max >= 3) {
+                        for (int i = 0; i < max; i++) {
+                            poses.push_back(i * size + start * size + j);
+                        }
+                    }
+                }
+            }
+        }
         return poses;
     }
 
@@ -243,13 +276,16 @@ struct Field : public Grid<Ball> {
         } else {
             int m = *std::max_element(poses.begin(), poses.end());
             int k = m / size;
-            for (int j = m; j > k * size; j--) {
-                data[j].shape.setFillColor(data[j - 1].shape.getFillColor());
-                data[j].shape.setRadius(data[j - 1].shape.getRadius());
+            cout << m << " " << k * size + poses.size() << endl;
+            for (int j = m; j >= k * size + poses.size(); j--) {
+                data[j].shape.setFillColor(data[j - poses.size()].shape.getFillColor());
+                data[j].shape.setRadius(data[j - poses.size()].shape.getRadius());
             }
-            int random = std::rand() % (size * size);
-            data[k * size].shape.setFillColor(data[random].shape.getFillColor());
-            data[k * size].shape.setRadius(data[random].shape.getRadius());
+            for (int j = k * size; j < k * size + poses.size(); j++) {
+                int random = std::rand() % (size * size);
+                data[j].shape.setFillColor(data[random].shape.getFillColor());
+                data[j].shape.setRadius(data[random].shape.getRadius());
+            }
         }
     }
 
@@ -278,6 +314,37 @@ struct Field : public Grid<Ball> {
         }
     }
 
+    void mouse_released(int moving_number, Point start_data){
+        int number = count(sf::Mouse::getPosition(window), moving_number);
+        if (moving_number >= 0) {
+            data[moving_number].shape.setPosition(start_data.x, start_data.y);
+            bool near1 = ((moving_number%size==number%size) && (abs(moving_number/size-number/size)==1));
+            bool near2 = ((moving_number/size==number/size) && (abs(moving_number%size-number%size)==1));
+            bool near = near1 xor near2;
+            if (number >= 0 && number != moving_number && near) {
+
+                auto color = data[number].shape.getFillColor();
+                data[number].shape.setFillColor(data[moving_number].shape.getFillColor());
+                data[moving_number].shape.setFillColor(color);
+
+                auto radius = data[number].shape.getRadius();
+                data[number].shape.setRadius(data[moving_number].shape.getRadius());
+                data[moving_number].shape.setRadius(radius);
+
+            }
+            moving_number = -1;
+        }
+    }
+
+    void full_draw(int moving_number){
+        window.clear();
+        draw();
+        if (moving_number >= 0) {
+            data[moving_number].draw(&window);
+        }
+        window.display();
+    }
+
 
     void run() {
         int moving_number = -1;
@@ -300,45 +367,17 @@ struct Field : public Grid<Ball> {
                 }
 
                 if (event.type == sf::Event::MouseButtonReleased) {
-                    int number = count(sf::Mouse::getPosition(window), moving_number);
-                    if (moving_number >= 0) {
-                        data[moving_number].shape.setPosition(start_data.x, start_data.y);
-                        if (number >= 0 && number != moving_number) {
-
-                            auto color = data[number].shape.getFillColor();
-                            data[number].shape.setFillColor(data[moving_number].shape.getFillColor());
-                            data[moving_number].shape.setFillColor(color);
-
-                            auto radius = data[number].shape.getRadius();
-                            data[number].shape.setRadius(data[moving_number].shape.getRadius());
-                            data[moving_number].shape.setRadius(radius);
-
-                        }
-                        moving_number = -1;
-                    }
+                    mouse_released(moving_number, start_data);
                 }
 
             }
-            window.clear();
             vector<int> f = check();
             if (f.size() > 0) {
-                cout<<"we are here"<<endl;
-                cout << data[6].shape.getPosition().x << " "<<data[6].shape.getPosition().x <<endl;
-                draw();
-                if (moving_number >= 0) {
-                    data[moving_number].draw(&window);
-                }
-                window.display();
-                cout<<"drawn"<<endl;
+                full_draw(moving_number);
                 remove(f);
-                std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
-            window.clear();
-            draw();
-            if (moving_number >= 0) {
-                data[moving_number].draw(&window);
-            }
-            window.display();
+            full_draw(moving_number);
         }
 
 
@@ -348,8 +387,6 @@ struct Field : public Grid<Ball> {
 
 
 int main() {
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
     std::vector<sf::Color> color;
     color.push_back(sf::Color::Magenta);
     color.push_back(sf::Color::Blue);
@@ -357,7 +394,7 @@ int main() {
     color.push_back(sf::Color::Red);
 
     std::vector<sf::Color> colors;
-    int n = 4;
+    int n = 6;
     for (int i = 0; i < n * n; i++) {
         int k = std::rand() % color.size();
         colors.push_back(color[k]);
@@ -365,7 +402,6 @@ int main() {
 
     Field field(n, colors);
     field.run();
-
 
     return 0;
 }
