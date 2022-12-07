@@ -343,6 +343,7 @@ struct Field : public Grid<Ball> {
             data[moving_number].draw(&window);
         }
         window.display();
+        
     }
 
 
