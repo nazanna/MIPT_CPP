@@ -8,98 +8,6 @@
 
 using namespace std;
 
-template<typename T>
-class Grid {
-public:
-    using size_type = unsigned;
-
-protected:
-    T *data;
-    size_type x_size;
-    size_type y_size;
-public:
-    Grid(size_type y_size, size_type x_size, T const &t) : x_size(x_size), y_size(y_size) {
-        data = (T *) operator new(y_size * x_size * sizeof(T));
-        for (unsigned i = 0; i < x_size * y_size; ++i) {
-            new(data + i) T(t);
-        }
-    }
-
-    Grid(size_type y_size, size_type x_size) : Grid(y_size, x_size, T()) {}
-
-    //y_size(y_size), x_size(x_size), ata(new T[x_size * y_size]) {}
-    Grid(T const &t) : Grid(1, 1, t) {}
-
-
-    //конструктор копирования
-    Grid(Grid<T> const &src) : Grid(src.x_size, src.y_size) {
-        for (unsigned i = 0; i < x_size * y_size; ++i) {
-            data[i] = src.data[i];
-        }
-    }
-
-    //оператор копирующего присваивания
-    Grid<T> &operator=(Grid<T> const &src) {
-        Grid<T> cmp(src);
-        std::swap(this->data, cmp.data);
-        std::swap(this->x_size, cmp.x_size);
-        std::swap(this->y_size, cmp.y_size);
-    }
-
-    //конструктор перемещения
-    Grid(Grid<T> &&src) : x_size(src.x_size), y_size(src.y_size), data(src.data) {
-        src.data = nullptr;
-    }
-
-    //перемещающее присваивание
-    Grid<T> &operator=(Grid<T> &&src) {
-        Grid<T> cmp(std::move(src));
-        std::swap(this->data, cmp.data);
-        std::swap(this->x_size, cmp.x_size);
-        std::swap(this->y_size, cmp.y_size);
-    }
-
-    //деструктор
-    ~Grid<T>() {
-        for (int i = 0; i < x_size * y_size; i++) {
-            (*(data + i)).~T();
-        }
-        operator delete(data);
-        //delete[] data;
-    }
-
-    T operator()(size_type y_idx, size_type x_idx) const {
-        return data[y_idx * x_size + x_idx];
-    }
-
-    T &operator()(size_type y_idx, size_type x_idx) {
-        return data[y_idx * x_size + x_idx];
-    }
-
-    Grid<T> &operator=(T const &t) {
-        for (auto it = data, end = data + x_size * y_size; it != end; ++it)
-            *it = t;
-        return *this;
-    }
-
-    class Arr final {
-    private:
-        size_type const y_idx;
-        Grid const &g;
-
-    public:
-        Arr(Grid &g, size_type y_idx) : y_idx(y_idx), g(g) {}
-
-        T &operator[](size_type x_idx) const {
-            return g.data[y_idx * g.x_size + x_idx];
-        }
-    };
-
-    Arr operator[](size_type y_idx) {
-        return Arr(*this, y_idx);
-    }
-};
-
 
 struct Ball {
     sf::CircleShape shape;
@@ -113,13 +21,10 @@ struct Ball {
                                  src.shape.getRadius()) {
     }
 
-    Ball(): Ball(sf::Color::Black, 0, 0, 0){}
-
     //оператор копирующего присваивания
     Ball &operator=(Ball const &src) {
         Ball cmp(src);
         std::swap(this->shape, cmp.shape);
-        return *this;
     }
 
     //конструктор перемещения
@@ -139,9 +44,9 @@ struct Ball {
         shape.setPosition(x, y);
     }
 
-    ~Ball() = default;
+    ~Ball() {}
 
-    void draw(sf::RenderWindow *window) const {
+    void draw(sf::RenderWindow *window) {
         window->draw(shape);
     }
 };
@@ -161,18 +66,103 @@ struct Point {
     }
 };
 
-struct Field : public Grid<Ball> {
+struct Field {
+    Ball *data;
     int size, score;
-
     sf::RenderWindow window;
     sf::Text text;
     sf::Font font;
     int size_cell;
-    vector<sf::Color> colors;
 
-    Field(int size, vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
-                                                size(x_size), size_cell(50), score(0), text(),
-                                                window(sf::VideoMode(600, 400), ""), colors(colors){
+    Field(int size, Ball const &t) : size(size) {
+        data = (Ball *) operator new(size * size * sizeof(T));
+        for (unsigned i = 0; i < size * size; ++i) {
+            new(data + i) Ball(t);
+        }
+    }
+
+    Grid(int size) : Grid(size, size, T()) {}
+
+    //size(size), size(size), ata(new T[size * size]) {}
+    Grid(Ball const &t) : Grid(1, 1, t) {}
+
+
+    //конструктор копирования
+    Grid(Field const &src) : Grid(src.size) {
+        for (unsigned i = 0; i < size * size; ++i) {
+            data[i] = src.data[i];
+        }
+    }
+
+    //оператор копирующего присваивания
+    Field &operator=(Field const &src) {
+        Field cmp(src);
+        std::swap(this->data, cmp.data);
+        std::swap(this->size, cmp.size);
+        std::swap(this->size, cmp.size);
+    }
+
+    //конструктор перемещения
+    Grid(Field &&src) :
+    size(src.size), data(src.data) {
+        src.data = nullptr;
+    }
+
+    //перемещающее присваивание
+    Field &operator=(Field &&src) {
+        Field cmp(std::move(src));
+        std::swap(this->data, cmp.data);
+        std::swap(this->size, cmp.size);
+        std::swap(this->size, cmp.size);
+    }
+
+    //деструктор
+    ~Field() {
+        for (int i = 0; i < size * size; i++) {
+            (*(data + i)).~Ball();
+        }
+        operator delete(data);
+        //delete[] data;
+    }
+
+    Ball operator()(size_type y_idx, size_type x_idx) const {
+        return data[y_idx * size + x_idx];
+    }
+
+    Ball &operator()(size_type y_idx, size_type x_idx) {
+        return data[y_idx * size + x_idx];
+    }
+
+    Field &operator=(Ball const &t) {
+        for (auto it = data, end = data + size * size; it != end; ++it)
+            *it = t;
+        return *this;
+    }
+
+    class Arr final {
+    private:
+        size_type const y_idx;
+        Grid const &g;
+
+    public:
+        Arr(Field &g, size_type y_idx) : y_idx(y_idx), g(g) {}
+
+        Ball &operator[](size_type x_idx) const {
+            return g.data[y_idx * g.size + x_idx];
+        }
+    };
+
+    Arr operator[](size_type y_idx) {
+        return Arr(*this, y_idx);
+    }
+
+    size_type get_size() const { return size; }
+
+    size_type get_size() const { return size; }
+
+    Field(int size, vector <sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
+                                                 size(size), size_cell(50), score(0), text(),
+                                                 window(sf::VideoMode(600, 400), "") {
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
         }
@@ -183,36 +173,41 @@ struct Field : public Grid<Ball> {
         text.setFillColor(sf::Color::Red);
         text.setOutlineColor(sf::Color::Red);
     }
+
     Field() : Field(0, std::vector<sf::Color>()) {}
 
-//    конструктор копирования
-    Field(Field const &src) : Field(src.size, src.colors){
-        for (unsigned i = 0; i < x_size * y_size; ++i) {
-            data[i] = src.data[i];
-        }
+    //оператор копирующего присваивания
+    Field &operator=(Field const &src) {
+        Field cmp(src);
+        std::swap(this->size, cmp.size);
+        std::swap(this->score, cmp.score);
+        std::swap(this->window, cmp.window);
+        std::swap(this->text, cmp.text);
+        std::swap(this->font, cmp.font);
+        std::swap(this->size_cell, cmp.size_cell);
+        std::swap(this->data, cmp.data);
+        std::swap(this->size, cmp.size);
+        std::swap(this->size, cmp.size);
     }
 
     //конструктор перемещения
-    Field(Field &&src) : Grid<Ball>(src.size, src.size, Ball(sf::Color::Magenta, 0, 0, 20)),
-                         size(src.size), size_cell(src.size_cell), score(src.score), text(),
-                         window(sf::VideoMode(600, 400), ""), colors(src.colors){
-        for (unsigned i = 0; i < size * size; ++i) {
-            data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
-        }
-        font.loadFromFile("../arial.ttf");
-        text.setFont(src.font);
-        text.setPosition(src.text.getPosition());
-        text.setString(src.text.getString());
-        text.setFillColor(src.text.getFillColor());
+    Field(Field &&src) : size(src.size), size(src.size), data(src.data), {
         src.data = nullptr;
+
     }
 
-    //оператор копирующего присваивания
-    Field &operator=(Field const &src)= delete;
-    Field &operator=(Field &&src) =delete;
+    //перемещающее присваивание
+    Field &operator=(Field &&src) {
+        cout << "перемещение" << endl;
+        Field cmp(std::move(src));
+        auto color = cmp.shape.getFillColor();
+        auto x = cmp.shape.getPosition().x, y = cmp.shape.getPosition().y;
+        std::swap(this->shape, cmp.shape);
+        shape.setFillColor(color);
+        shape.setPosition(x, y);
+    }
 
-    ~Field()= default;
-
+    ~Field() {}
 
     void draw() {
         for (unsigned i = 0; i < size * size; ++i) {
@@ -225,7 +220,7 @@ struct Field : public Grid<Ball> {
         vector<int> poses;
         for (int i = 0; i < size; i++) {
             int start = 0, max = 1, current = 1;
-            if (poses.empty()) {
+            if (poses.size() == 0) {
                 for (int j = 1; j < size; j++) {
                     auto color1 = data[i * size + j - 1].shape.getFillColor();
                     auto color2 = data[i * size + j].shape.getFillColor();
@@ -251,10 +246,10 @@ struct Field : public Grid<Ball> {
             }
         }
 
-        if (poses.empty()) {
+        if (poses.size() == 0) {
             for (int j = 0; j < size; j++) {
                 int start = 0, max = 1, current = 1;
-                if (poses.empty()) {
+                if (poses.size() == 0) {
                     for (int i = 1; i < size; i++) {
                         auto color1 = data[(i - 1) * size + j].shape.getFillColor();
                         auto color2 = data[i * size + j].shape.getFillColor();
@@ -287,9 +282,9 @@ struct Field : public Grid<Ball> {
         score += poses.size();
         text.setString("Score: \n" + std::to_string(score));
         if (abs(poses[0] - poses[1]) > 1) {
-            for (int pose : poses) {
-                int k = pose / size;
-                for (int j = pose % size; j > 0; j--) {
+            for (int i = 0; i < poses.size(); i++) {
+                int k = poses[i] / size;
+                for (int j = poses[i] % size; j > 0; j--) {
                     data[k * size + j].shape.setFillColor(data[k * size + j - 1].shape.getFillColor());
                     data[k * size + j].shape.setRadius(data[k * size + j - 1].shape.getRadius());
                 }
@@ -338,12 +333,12 @@ struct Field : public Grid<Ball> {
         }
     }
 
-    int mouse_released(int moving_number, Point start_data){
+    void mouse_released(int moving_number, Point start_data) {
         int number = count(sf::Mouse::getPosition(window), moving_number);
         if (moving_number >= 0) {
             data[moving_number].shape.setPosition(start_data.x, start_data.y);
-            bool near1 = ((moving_number%size==number%size) && (abs(moving_number/size-number/size)==1));
-            bool near2 = ((moving_number/size==number/size) && (abs(moving_number%size-number%size)==1));
+            bool near1 = ((moving_number % size == number % size) && (abs(moving_number / size - number / size) == 1));
+            bool near2 = ((moving_number / size == number / size) && (abs(moving_number % size - number % size) == 1));
             bool near = near1 xor near2;
             if (number >= 0 && number != moving_number && near) {
 
@@ -358,10 +353,9 @@ struct Field : public Grid<Ball> {
             }
             moving_number = -1;
         }
-        return moving_number;
     }
 
-    void full_draw(int moving_number){
+    void full_draw(int moving_number) {
         window.clear();
         draw();
         if (moving_number >= 0) {
@@ -393,12 +387,12 @@ struct Field : public Grid<Ball> {
                 }
 
                 if (event.type == sf::Event::MouseButtonReleased) {
-                    moving_number=mouse_released(moving_number, start_data);
+                    mouse_released(moving_number, start_data);
                 }
 
             }
             vector<int> f = check();
-            if (!f.empty()) {
+            if (f.size() > 0) {
                 full_draw(moving_number);
                 remove(f);
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -413,14 +407,13 @@ struct Field : public Grid<Ball> {
 
 
 int main() {
-    std::vector<sf::Color> color;
+    std::vector <sf::Color> color;
     color.push_back(sf::Color::Magenta);
     color.push_back(sf::Color::Blue);
     color.push_back(sf::Color::Green);
     color.push_back(sf::Color::Red);
-    color.push_back(sf::Color::Cyan);
 
-    std::vector<sf::Color> colors;
+    std::vector <sf::Color> colors;
     int n = 6;
     for (int i = 0; i < n * n; i++) {
         int k = std::rand() % color.size();
