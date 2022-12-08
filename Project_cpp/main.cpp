@@ -168,10 +168,11 @@ struct Field : public Grid<Ball> {
     sf::Text text;
     sf::Font font;
     int size_cell;
+    int steps;
     vector<sf::Color> colors;
 
     Field(int size, vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
-                                                size(x_size), size_cell(50), score(0), text(),
+                                                size(x_size), size_cell(50), score(0), text(), steps(0),
                                                 window(sf::VideoMode(600, 400), ""), colors(colors){
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
@@ -179,7 +180,7 @@ struct Field : public Grid<Ball> {
         font.loadFromFile("../arial.ttf");
         text.setFont(font);
         text.setPosition(window.getSize().x * 0.8, 0);
-        text.setString(sf::String("Score: \n" + std::to_string(score)));
+        text.setString("Score: \n" + std::to_string(score)+"\n Steps: \n"+std::to_string(steps));
         text.setFillColor(sf::Color::Red);
         text.setOutlineColor(sf::Color::Red);
     }
@@ -194,7 +195,7 @@ struct Field : public Grid<Ball> {
 
     //конструктор перемещения
     Field(Field &&src) : Grid<Ball>(src.size, src.size, Ball(sf::Color::Magenta, 0, 0, 20)),
-                         size(src.size), size_cell(src.size_cell), score(src.score), text(),
+                         size(src.size), size_cell(src.size_cell), score(src.score), text(), steps(src.steps),
                          window(sf::VideoMode(600, 400), ""), colors(src.colors){
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
@@ -285,7 +286,7 @@ struct Field : public Grid<Ball> {
 
     void remove(vector<int> poses) {
         score += poses.size();
-        text.setString("Score: \n" + std::to_string(score));
+        text.setString("Score: \n" + std::to_string(score)+"\n Steps: \n"+std::to_string(steps));
         if (abs(poses[0] - poses[1]) > 1) {
             for (int pose : poses) {
                 int k = pose / size;
@@ -355,6 +356,9 @@ struct Field : public Grid<Ball> {
                 data[number].shape.setRadius(data[moving_number].shape.getRadius());
                 data[moving_number].shape.setRadius(radius);
 
+                steps++;
+                text.setString("Score: \n" + std::to_string(score)+"\n Steps: \n"+std::to_string(steps));
+
             }
             moving_number = -1;
         }
@@ -373,7 +377,7 @@ struct Field : public Grid<Ball> {
 
 
     void run() {
-        int moving_number = -1;
+        int moving_number = -1, steps=0;
         Point start_data(0, 0), start_mouse(0, 0);
         while (window.isOpen()) {
             sf::Event event;

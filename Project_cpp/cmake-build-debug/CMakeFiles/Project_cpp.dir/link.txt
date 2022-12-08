@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/Project_cpp.dir/main.cpp.o -o Project_cpp  -lsfml-graphics -lsfml-window -lsfml-system 
