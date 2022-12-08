@@ -1,12 +1,10 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <utility>
 #include <cmath>
 #include <chrono>
 #include <thread>
 #include <string>
-
-using namespace std;
+#include <random>
 
 template<typename T>
 class Grid {
@@ -100,7 +98,6 @@ public:
     }
 };
 
-
 struct Ball {
     sf::CircleShape shape;
 
@@ -130,7 +127,6 @@ struct Ball {
 
     //перемещающее присваивание
     Ball &operator=(Ball &&src) {
-        cout << "перемещение" << endl;
         Ball cmp(std::move(src));
         auto color = cmp.shape.getFillColor();
         auto x = cmp.shape.getPosition().x, y = cmp.shape.getPosition().y;
@@ -162,16 +158,13 @@ struct Point {
 };
 
 struct Field : public Grid<Ball> {
-    int size, score;
-
+    int size, score, size_cell, steps;
     sf::RenderWindow window;
     sf::Text text;
     sf::Font font;
-    int size_cell;
-    int steps;
-    vector<sf::Color> colors;
+    std::vector<sf::Color> colors;
 
-    Field(int size, vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
+    Field(int size, std::vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
                                                 size(x_size), size_cell(50), score(0), text(), steps(0),
                                                 window(sf::VideoMode(800, 600), ""), colors(colors) {
         for (unsigned i = 0; i < size * size; ++i) {
@@ -181,7 +174,7 @@ struct Field : public Grid<Ball> {
         text.setFont(font);
         text.setPosition(window.getSize().x * 0.8, 0);
         text.setString("Score: \n" + std::to_string(score) + "\n Steps: \n" + std::to_string(steps));
-        text.setFillColor(sf::Color::Red);
+        text.setFillColor(sf::Color::White);
         text.setOutlineColor(sf::Color::Red);
     }
 
@@ -195,7 +188,7 @@ struct Field : public Grid<Ball> {
     }
 
     //конструктор перемещения
-    Field(Field &&src) : Grid<Ball>(src.size, src.size, Ball(sf::Color::Magenta, 0, 0, 20)),
+    Field(Field &&src)  : Grid<Ball>(src.size, src.size, Ball(sf::Color::Magenta, 0, 0, 20)),
                          size(src.size), size_cell(src.size_cell), score(src.score), text(), steps(src.steps),
                          window(sf::VideoMode(600, 400), ""), colors(src.colors) {
         for (unsigned i = 0; i < size * size; ++i) {
@@ -216,7 +209,6 @@ struct Field : public Grid<Ball> {
 
     ~Field() = default;
 
-
     void draw() {
         for (unsigned i = 0; i < size * size; ++i) {
             data[i].draw(&window);
@@ -224,11 +216,11 @@ struct Field : public Grid<Ball> {
         window.draw(text);
     }
 
-    vector<int> check() {
-        vector<int> poses;
+    std::vector<int> check() {
+        std::vector<int> poses_v, poses_h;
         for (int i = 0; i < size; i++) {
             int start = 0, max = 1, current = 1;
-            if (poses.empty()) {
+            if (poses_v.empty()) {
                 for (int j = 1; j < size; j++) {
                     auto color1 = data[i * size + j - 1].shape.getFillColor();
                     auto color2 = data[i * size + j].shape.getFillColor();
@@ -248,45 +240,45 @@ struct Field : public Grid<Ball> {
                 }
                 if (max >= 3) {
                     for (int j = 0; j < max; j++) {
-                        poses.push_back(i * size + start + j);
+                        poses_v.push_back(i * size + start + j);
                     }
                 }
             }
         }
 
-        if (poses.empty()) {
-            for (int j = 0; j < size; j++) {
-                int start = 0, max = 1, current = 1;
-                if (poses.empty()) {
-                    for (int i = 1; i < size; i++) {
-                        auto color1 = data[(i - 1) * size + j].shape.getFillColor();
-                        auto color2 = data[i * size + j].shape.getFillColor();
-                        if (color1 == color2) {
-                            current++;
-                        } else {
-                            if (current > max) {
-                                max = current;
-                                start = i - current;
-                            }
-                            current = 1;
+        for (int j = 0; j < size; j++) {
+            int start = 0, max = 1, current = 1;
+            if (poses_h.empty()) {
+                for (int i = 1; i < size; i++) {
+                    auto color1 = data[(i - 1) * size + j].shape.getFillColor();
+                    auto color2 = data[i * size + j].shape.getFillColor();
+                    if (color1 == color2) {
+                        current++;
+                    } else {
+                        if (current > max) {
+                            max = current;
+                            start = i - current;
                         }
+                        current = 1;
                     }
-                    if (current > max) {
-                        max = current;
-                        start = size - current;
-                    }
-                    if (max >= 3) {
-                        for (int i = 0; i < max; i++) {
-                            poses.push_back(i * size + start * size + j);
-                        }
+                }
+                if (current > max) {
+                    max = current;
+                    start = size - current;
+                }
+                if (max >= 3) {
+                    for (int i = 0; i < max; i++) {
+                        poses_h.push_back(i * size + start * size + j);
                     }
                 }
             }
         }
-        return poses;
+        if (poses_h.size()>poses_v.size())
+            return poses_h;
+        return poses_v;
     }
 
-    void remove(vector<int> poses) {
+    void remove(std::vector<int> poses) {
         score += poses.size();
         text.setString("Score: \n" + std::to_string(score) + "\n Steps: \n" + std::to_string(steps));
         if (abs(poses[0] - poses[1]) > 1) {
@@ -303,7 +295,6 @@ struct Field : public Grid<Ball> {
         } else {
             int m = *std::max_element(poses.begin(), poses.end());
             int k = m / size;
-            cout << m << " " << k * size + poses.size() << endl;
             for (int j = m; j >= k * size + poses.size(); j--) {
                 data[j].shape.setFillColor(data[j - poses.size()].shape.getFillColor());
                 data[j].shape.setRadius(data[j - poses.size()].shape.getRadius());
@@ -323,8 +314,6 @@ struct Field : public Grid<Ball> {
         for (unsigned i = 0; i < size * size; ++i) {
             if (i != ban_number) {
                 int r = data[i].shape.getRadius();
-//                cout << x << " " << y << " " << data[i].shape.getPosition().x << " "
-//                     << data[i].shape.getPosition().y << " " << data[i].shape.getRadius() << " " << i << endl;
                 if (pow((data[i].shape.getPosition().x + r - x), 2) + pow((data[i].shape.getPosition().y + r - y), 2)
                     <= pow(r, 2)) {
                     number = i;
@@ -360,7 +349,6 @@ struct Field : public Grid<Ball> {
 
                 this->steps++;
                 text.setString("Score: \n" + std::to_string(score) + "\n Steps: \n" + std::to_string(steps));
-
             }
             moving_number = -1;
         }
@@ -374,9 +362,7 @@ struct Field : public Grid<Ball> {
             data[moving_number].draw(&window);
         }
         window.display();
-
     }
-
 
     void run() {
         int moving_number = -1;
@@ -403,7 +389,7 @@ struct Field : public Grid<Ball> {
                 }
 
             }
-            vector<int> f = check();
+            std::vector<int> f = check();
             if (!f.empty()) {
                 full_draw(moving_number);
                 remove(f);
@@ -420,11 +406,12 @@ int main() {
     color.push_back(sf::Color::Magenta);
     color.push_back(sf::Color::Blue);
     color.push_back(sf::Color::Green);
-    color.push_back(sf::Color::Red);
     color.push_back(sf::Color::Cyan);
+    color.push_back(sf::Color::White);
 
     std::vector<sf::Color> colors;
     int n = 9;
+    std::srand(time(NULL));
     for (int i = 0; i < n * n; i++) {
         int k = std::rand() % color.size();
         colors.push_back(color[k]);

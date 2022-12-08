@@ -284,9 +284,6 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
   /usr/include/SFML/Graphics/Sprite.hpp \
   /usr/include/SFML/Graphics/Text.hpp \
   /usr/include/SFML/Graphics/VertexBuffer.hpp \
-  /usr/include/c++/11/iostream \
-  /usr/include/c++/11/istream \
-  /usr/include/c++/11/bits/istream.tcc \
   /usr/include/c++/11/cmath \
   /usr/include/math.h \
   /usr/include/x86_64-linux-gnu/bits/math-vector.h \
@@ -305,8 +302,25 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
   /usr/include/c++/11/thread \
   /usr/include/c++/11/bits/std_thread.h \
   /usr/include/c++/11/bits/refwrap.h \
-  /usr/include/c++/11/bits/this_thread_sleep.h
+  /usr/include/c++/11/bits/this_thread_sleep.h \
+  /usr/include/c++/11/random \
+  /usr/include/c++/11/bits/random.h \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h \
+  /usr/include/c++/11/bits/random.tcc \
+  /usr/include/c++/11/numeric \
+  /usr/include/c++/11/bits/stl_numeric.h \
+  /usr/include/c++/11/bit
 
+
+/usr/include/c++/11/bits/stl_numeric.h:
+
+/usr/include/c++/11/numeric:
+
+/usr/include/c++/11/bits/random.tcc:
+
+/usr/include/c++/11/bits/random.h:
+
+/usr/include/c++/11/random:
 
 /usr/include/c++/11/bits/parse_numbers.h:
 
@@ -317,8 +331,6 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
 /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
 
 /usr/include/c++/11/cmath:
-
-/usr/include/c++/11/iostream:
 
 /usr/include/SFML/Graphics/Glsl.hpp:
 
@@ -343,6 +355,8 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
 /usr/include/SFML/Graphics/PrimitiveType.hpp:
 
 /usr/include/SFML/Graphics/Color.hpp:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/opt_random.h:
 
 /usr/include/SFML/Graphics/VertexArray.hpp:
 
@@ -397,6 +411,8 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
 /usr/include/SFML/System/ThreadLocalPtr.inl:
 
 /usr/include/SFML/System/Thread.inl:
+
+/usr/include/c++/11/bit:
 
 /usr/include/SFML/System/String.inl:
 
@@ -740,8 +756,6 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
 
 /usr/include/c++/11/bits/exception_defines.h:
 
-/usr/include/c++/11/bits/istream.tcc:
-
 /usr/include/time.h:
 
 ../main.cpp:
@@ -809,8 +823,6 @@ CMakeFiles/Project_cpp.dir/main.cpp.o: ../main.cpp \
 /usr/include/x86_64-linux-gnu/bits/waitflags.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-/usr/include/c++/11/istream:
 
 /usr/include/endian.h:
 
