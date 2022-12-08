@@ -113,7 +113,7 @@ struct Ball {
                                  src.shape.getRadius()) {
     }
 
-    Ball(): Ball(sf::Color::Black, 0, 0, 0){}
+    Ball() : Ball(sf::Color::Black, 0, 0, 0) {}
 
     //оператор копирующего присваивания
     Ball &operator=(Ball const &src) {
@@ -173,21 +173,22 @@ struct Field : public Grid<Ball> {
 
     Field(int size, vector<sf::Color> colors) : Grid<Ball>(size, size, Ball(sf::Color::Magenta, 0, 0, 20)),
                                                 size(x_size), size_cell(50), score(0), text(), steps(0),
-                                                window(sf::VideoMode(600, 400), ""), colors(colors){
+                                                window(sf::VideoMode(800, 600), ""), colors(colors) {
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
         }
         font.loadFromFile("../arial.ttf");
         text.setFont(font);
         text.setPosition(window.getSize().x * 0.8, 0);
-        text.setString("Score: \n" + std::to_string(score)+"\n Steps: \n"+std::to_string(steps));
+        text.setString("Score: \n" + std::to_string(score) + "\n Steps: \n" + std::to_string(steps));
         text.setFillColor(sf::Color::Red);
         text.setOutlineColor(sf::Color::Red);
     }
+
     Field() : Field(0, std::vector<sf::Color>()) {}
 
 //    конструктор копирования
-    Field(Field const &src) : Field(src.size, src.colors){
+    Field(Field const &src) : Field(src.size, src.colors) {
         for (unsigned i = 0; i < x_size * y_size; ++i) {
             data[i] = src.data[i];
         }
@@ -196,7 +197,7 @@ struct Field : public Grid<Ball> {
     //конструктор перемещения
     Field(Field &&src) : Grid<Ball>(src.size, src.size, Ball(sf::Color::Magenta, 0, 0, 20)),
                          size(src.size), size_cell(src.size_cell), score(src.score), text(), steps(src.steps),
-                         window(sf::VideoMode(600, 400), ""), colors(src.colors){
+                         window(sf::VideoMode(600, 400), ""), colors(src.colors) {
         for (unsigned i = 0; i < size * size; ++i) {
             data[i] = Ball(colors[i], size_cell * (i / size), size_cell * (i % size), 20);
         }
@@ -209,10 +210,11 @@ struct Field : public Grid<Ball> {
     }
 
     //оператор копирующего присваивания
-    Field &operator=(Field const &src)= delete;
-    Field &operator=(Field &&src) =delete;
+    Field &operator=(Field const &src) = delete;
 
-    ~Field()= default;
+    Field &operator=(Field &&src) = delete;
+
+    ~Field() = default;
 
 
     void draw() {
@@ -286,9 +288,9 @@ struct Field : public Grid<Ball> {
 
     void remove(vector<int> poses) {
         score += poses.size();
-        text.setString("Score: \n" + std::to_string(score)+"\n Steps: \n"+std::to_string(steps));
+        text.setString("Score: \n" + std::to_string(score) + "\n Steps: \n" + std::to_string(steps));
         if (abs(poses[0] - poses[1]) > 1) {
-            for (int pose : poses) {
+            for (int pose: poses) {
                 int k = pose / size;
                 for (int j = pose % size; j > 0; j--) {
                     data[k * size + j].shape.setFillColor(data[k * size + j - 1].shape.getFillColor());
@@ -339,12 +341,12 @@ struct Field : public Grid<Ball> {
         }
     }
 
-    int mouse_released(int moving_number, Point start_data){
+    int mouse_released(int moving_number, Point start_data) {
         int number = count(sf::Mouse::getPosition(window), moving_number);
         if (moving_number >= 0) {
             data[moving_number].shape.setPosition(start_data.x, start_data.y);
-            bool near1 = ((moving_number%size==number%size) && (abs(moving_number/size-number/size)==1));
-            bool near2 = ((moving_number/size==number/size) && (abs(moving_number%size-number%size)==1));
+            bool near1 = ((moving_number % size == number % size) && (abs(moving_number / size - number / size) == 1));
+            bool near2 = ((moving_number / size == number / size) && (abs(moving_number % size - number % size) == 1));
             bool near = near1 xor near2;
             if (number >= 0 && number != moving_number && near) {
 
@@ -356,8 +358,8 @@ struct Field : public Grid<Ball> {
                 data[number].shape.setRadius(data[moving_number].shape.getRadius());
                 data[moving_number].shape.setRadius(radius);
 
-                steps++;
-                text.setString("Score: \n" + std::to_string(score)+"\n Steps: \n"+std::to_string(steps));
+                this->steps++;
+                text.setString("Score: \n" + std::to_string(score) + "\n Steps: \n" + std::to_string(steps));
 
             }
             moving_number = -1;
@@ -365,7 +367,7 @@ struct Field : public Grid<Ball> {
         return moving_number;
     }
 
-    void full_draw(int moving_number){
+    void full_draw(int moving_number) {
         window.clear();
         draw();
         if (moving_number >= 0) {
@@ -377,7 +379,7 @@ struct Field : public Grid<Ball> {
 
 
     void run() {
-        int moving_number = -1, steps=0;
+        int moving_number = -1;
         Point start_data(0, 0), start_mouse(0, 0);
         while (window.isOpen()) {
             sf::Event event;
@@ -397,7 +399,7 @@ struct Field : public Grid<Ball> {
                 }
 
                 if (event.type == sf::Event::MouseButtonReleased) {
-                    moving_number=mouse_released(moving_number, start_data);
+                    moving_number = mouse_released(moving_number, start_data);
                 }
 
             }
@@ -409,10 +411,7 @@ struct Field : public Grid<Ball> {
             }
             full_draw(moving_number);
         }
-
-
     }
-
 };
 
 
@@ -425,7 +424,7 @@ int main() {
     color.push_back(sf::Color::Cyan);
 
     std::vector<sf::Color> colors;
-    int n = 6;
+    int n = 9;
     for (int i = 0; i < n * n; i++) {
         int k = std::rand() % color.size();
         colors.push_back(color[k]);
